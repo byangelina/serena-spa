@@ -3,11 +3,20 @@ export async function calcularRuta(origen, destino) {
   // Construimos la URL con las coordenadas de origen y destino
   const url = `https://router.project-osrm.org/route/v1/driving/${origen.lng},${origen.lat};${destino.lng},${destino.lat}?overview=false`
 
+  // Cancelamos la solicitud si demora más de 10 segundos
+  const controlador = new AbortController()
+  const temporizador = setTimeout(() => controlador.abort(), 10000)
+
   let respuesta
   try {
-    respuesta = await fetch(url)
+    respuesta = await fetch(url, { signal: controlador.signal })
   } catch (errorDeRed) {
+    if (errorDeRed.name === "AbortError") {
+      throw new Error("La solicitud tardó demasiado. Inténtelo nuevamente.")
+    }
     throw new Error("No se pudo conectar con el servicio de rutas. Revisa tu conexión.")
+  } finally {
+    clearTimeout(temporizador)
   }
 
   if (!respuesta.ok) {
