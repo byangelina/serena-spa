@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { SUCURSALES } from "../data/sucursales.js"
 
 // Servicios disponibles para el select
 const SERVICIOS_OPCIONES = [
@@ -62,6 +63,9 @@ function Contacto() {
     else if (!/^\+?[\d\s]{8,15}$/.test(form.telefono.trim()))
       nuevosErrores.telefono = "Formato inválido (ej: +56 9 1234 5678)"
 
+    if (!form.sucursal)
+      nuevosErrores.sucursal = "Selecciona una sucursal"
+
     if (!form.servicio)
       nuevosErrores.servicio = "Selecciona un servicio"
 
@@ -103,7 +107,8 @@ function Contacto() {
       servicio: reserva.servicio,
       fecha: reserva.fecha,
       hora: reserva.hora,
-      mensaje: reserva.mensaje
+      mensaje: reserva.mensaje,
+      sucursal: reserva.sucursal || ""
     })
     setModoEdicion(reserva.id)
     window.scrollTo({ top: document.getElementById("contacto").offsetTop, behavior: "smooth" })
@@ -246,14 +251,17 @@ function Contacto() {
               {errores.telefono && <span style={errorStyle}>{errores.telefono}</span>}
             </div>
           </div>
-          {form.sucursal && (
-            <p style={{
-              fontSize: "0.78rem", color: "var(--verde-osc)",
-              marginBottom: "0.8rem", fontWeight: 500
-            }}>
-              Sucursal seleccionada: {form.sucursal}
-            </p>
-          )}
+          <label style={labelStyle}>Sucursal</label>
+          <select
+            name="sucursal" value={form.sucursal} onChange={manejarCambio}
+            style={{ ...inputStyle("sucursal"), marginBottom: "0.3rem" }}
+          >
+            <option value="">Selecciona una sucursal</option>
+            {SUCURSALES.map(s => (
+              <option key={s.id} value={s.nombre}>{s.nombre}</option>
+            ))}
+          </select>
+          {errores.sucursal && <span style={errorStyle}>{errores.sucursal}</span>}
 
           <label style={labelStyle}>Servicio</label>
           <select
